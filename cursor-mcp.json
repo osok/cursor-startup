@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "github": {
+      "command": "bash",
+      "args": ["/ai/work/agents/mcp_erver_cursor/github.sh"]
+    },
+    "exa-mcp": {
+      "command": "npx",
+      "args": ["-y", "exa-mcp-server"],
+      "env": {
+        "EXA_API_KEY": "{EXA API KEY}"
+      }
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"]
+    }
+  }
+}
