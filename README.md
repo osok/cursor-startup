@@ -16,6 +16,13 @@ This is depercated, but it stil works.  These rules tell the AI how to use the `
 
 - `mcp.json` : this is project realated tools, I keep the file-system mcp tool here so I can set its permissions to only the project directory.
 
+## .cursor/rules
+- 001-project-organization.mdc - Project organization and file usage guidelines (Rule Type: Manual)
+- 002-development-workflow.mdc - Task management and workflow rules (Rule Type: Always)
+- 003-testing-guidelines.mdc - Testing workflow and conventions (Rule Type: Manual)
+- 004-context7-integration.mdc - Context7 integration settings (Rule Type: Always)
+
+
 ## Other files
 
 `github.sh` : should reside outside the project directory and only needs to be set up once.  in your `~/.cursor` dir is a good place for it.
