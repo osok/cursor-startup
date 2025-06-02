@@ -1,12 +1,12 @@
 ---
 description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 ---
 description: Project organization, documentation, and file structure guidelines
 globs: **/*
-alwaysApply: false
+alwaysApply: true
 ---
 
 # Project Documentation Guidelines

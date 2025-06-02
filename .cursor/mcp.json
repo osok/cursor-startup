@@ -5,7 +5,8 @@
             "args": [
                 "-y",
                 "@modelcontextprotocol/server-filesystem",
-                "{ REPLACE WITH YOUR PROJECT DIR }"
+                "[location of your project folder]",
+                "[optional other directories]"
             ]
         }
     }
