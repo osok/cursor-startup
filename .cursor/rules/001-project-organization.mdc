@@ -39,7 +39,7 @@ Path: `docs/notes.md`
 - Note any deviations from the initial design document and their rationale
 
 ### Format
-- New Decision: "[DATE]: Decision to [DECISION] because [RATIONALE]."
+- New Decision: " ecision to [DECISION] because [RATIONALE]."
 - New Challenge: "**Challenge**: [DESCRIPTION]\n**Solution**: [SOLUTION]\n**Impact**: [IMPACT]"
 - New Todo: "[ ] [DESCRIPTION] - [PRIORITY: High/Medium/Low] [ESTIMATION]"
 - Completed Todo: "[x] [DESCRIPTION] - Implemented in [FILE/COMPONENT]"
@@ -54,7 +54,7 @@ Path: `docs/Design.md`
 
 ### Reference Rules
 1. CONSULT the design document before implementing any feature
-2. ALIGN implementation with the specifications in the design document
-3. NOTE any deviations from the design in the notes.md file with clear rationale
-4. UPDATE the design document only for major structural changes after consultation
+2. UNDER NO CIRCUMSTANCE will you modify the Design.md unless the user explicitly asks you to modify the Design.md.
+3. ALIGN implementation with the specifications in the design document
+4. NOTE any deviations from the design in the notes.md file with clear rationale
 5. PRESERVE design decisions by referencing the document section in code comments

@@ -1,5 +1,130 @@
 ---
-description:
-globs:
+description: 
+globs: 
 alwaysApply: false
 ---
+# Documentation Usage Guidelines
+
+## Overview
+
+The MCP Documentation Tool Server automatically generates comprehensive documentation for this project. These guidelines explain how to effectively use this documentation to understand the codebase and maintain consistency.
+
+## Generated Documentation Files
+
+### 1. UML Class Diagrams (`docs/uml.txt`)
+
+This file contains PlantUML representations of all classes in the project:
+
+```
+@startuml
+skinparam pageMargin 50
+skinparam pageWidth 3000
+left to right direction
+direction LR
+
+package src.analyzers {
+  class CodeParser {
+    + parse_python_file(file_path: str) : ast.Module
+    + parse_class(class_def: ast.ClassDef) : Dict[str, Any]
+    ...
+  }
+  ...
+}
+@enduml
+```
+
+When to use:
+- Before creating new classes to understand inheritance relationships
+- When extending existing classes to maintain consistent patterns
+- When refactoring object-oriented code to preserve architecture
+
+### 2. Module Functions (`docs/module-functions.txt`)
+
+This file lists all module-level functions with signatures and decorators:
+
+```
+Module-Level Functions Documentation
+========================================
+
+Package: src
+  Module: utils.file_utils
+    - ensure_directory_exists(directory_path: str) -> None
+    - list_python_files(directory_path: str) -> List[str]
+    ...
+```
+
+When to use:
+- Before implementing new utility functions to avoid duplication
+- When modifying existing functions to understand dependencies
+- When needing to use utility functions from other modules
+
+### 3. Project Structure (`docs/tree-structure.txt`)
+
+This file shows the hierarchical organization of the project:
+
+```
+mcp-support-docs/
+├── src/
+│   ├── analyzers/
+│   │   ├── __init__.py
+│   │   ├── code_parser.py
+│   │   ├── file_filter.py
+│   │   └── oo_detector.py
+│   ├── tools/
+│   │   └── ...
+...
+```
+
+When to use:
+- When adding new files to place them in appropriate directories
+- To understand the overall code organization
+- When refactoring to maintain consistent structure
+
+## Workflow Integration
+
+### Before Starting Work
+
+1. **Generate Fresh Documentation**
+   ```
+   Please use the docs-generator MCP server to generate documentation for this project
+   ```
+
+2. **Review Documentation**
+   - Examine UML diagrams for class relationships
+   - Check module functions for existing utilities
+   - Review project structure for organization patterns
+
+### During Development
+
+1. **Reference Documentation**
+   - When implementing new features, check documentation first
+   - Follow established patterns shown in UML diagrams
+   - Use existing utilities shown in module functions
+
+2. **Documentation as Code**
+   - Treat documentation as part of the codebase
+   - Follow patterns shown in documentation for consistency
+   - When documentation reveals issues, fix the code to match expected patterns
+
+### After Completing Work
+
+1. **Regenerate Documentation**
+   - After making significant changes, regenerate documentation
+   - Compare changes to verify architectural consistency
+   - Address any issues revealed by documentation changes
+
+## Best Practices
+
+- **Always Generate Before Starting**: Ensure you're working with current documentation
+- **Search Before Creating**: Look for existing functionality before implementing new code
+- **Follow Patterns**: Use the documentation to guide implementation choices
+- **Update Regularly**: Regenerate documentation after significant changes
+
+## Help and Support
+
+If you encounter issues with documentation generation:
+
+1. Check server logs for errors
+2. Verify MCP server configuration
+3. Ensure all files are properly formatted
+4. Run the test suite to validate functionality
