@@ -8,12 +8,18 @@
       "command": "npx",
       "args": ["-y", "exa-mcp-server"],
       "env": {
-        "EXA_API_KEY": "{EXA API KEY}"
+        "EXA_API_KEY": "91c80f90-bbbd-40be-af71-35b522c92146"
       }
     },
     "context7": {
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp@latest"]
+    },
+    "docs-tools": {
+      "command": "node",
+      "args": ["/ai/work/agents/mcp-support-docs/bin/server.js"],
+      "cwd": "/ai/work/agents/mcp-support-docs"
     }
   }
 }
+

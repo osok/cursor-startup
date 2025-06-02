@@ -5,8 +5,7 @@
             "args": [
                 "-y",
                 "@modelcontextprotocol/server-filesystem",
-                "[location of your project folder]",
-                "[optional other directories]"
+                "${workspaceFolder}"
             ]
         }
     }
