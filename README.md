@@ -24,14 +24,13 @@ These are the startup files I use in my cursor environment.
 
 ## Other files
 
-`github.sh` : should reside outside the project directory and only needs to be set up once.  in your `~/.cursor` dir is a good place for it.
-
-`cursor-mcp.json` : goes in the IDE cursor settings.
+- `github.sh` : should reside outside the project directory and only needs to be set up once.  in your `~/.cursor` dir is a good place for it.
+- `cursor-mcp.json` : goes in the IDE cursor settings.
 
 ## Tools
 
-`filesystem` : allows access to project files so it can read / write files on your behalf.
-`github` : interact with github
-`exa-mcp` : allows AI to search the web to find updated information.
-`context7` : provides upto date documentation on a number of libraries, so the AI knows how to properly code.
-`docs-generator` : creates text based UML for all OO, module-functions doc that describes the methods in non OO code, and a tree structure for the project. This keeps cursor from duplicating code or getting lost in the project.
+- `filesystem` : allows access to project files so it can read / write files on your behalf.
+- `github` : interact with github
+- `exa-mcp` : allows AI to search the web to find updated information.
+- `context7` : provides upto date documentation on a number of libraries, so the AI knows how to properly code.
+- `docs-generator` : creates text based UML for all OO, module-functions doc that describes the methods in non OO code, and a tree structure for the project. This keeps cursor from duplicating code or getting lost in the project.
