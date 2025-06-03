@@ -58,3 +58,12 @@ Path: `docs/Design.md`
 3. ALIGN implementation with the specifications in the design document
 4. NOTE any deviations from the design in the notes.md file with clear rationale
 5. PRESERVE design decisions by referencing the document section in code comments
+
+## Conventions
+Path: `/docs/conventions/`
+
+### Usage
+- for each document in the directory read an understand the coding conventions for the framework it pretains to.
+- use these files to help understand how the user wants the framework to be used and any special organization and usage details for the framework
+
+### Update

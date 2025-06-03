@@ -17,7 +17,7 @@ project-name/
 ```
 
 ## Environment & Dependencies
-- Always use `python -m venv venv` for virtual environments
+- Always use `python -m venv venv` for virtual environments,create this first after the task list
 - Use pip with requirements.txt (not Poetry/pipenv)
 - Store configuration in .env files with Pydantic BaseSettings classes
 - Entry point: `application.py` in root that imports from `src/`
