@@ -59,12 +59,83 @@ These are the startup files I use in my cursor environment.
 - `github.sh` : should reside outside the project directory and only needs to be set up once.  in your `~/.cursor` dir is a good place for it.
 - `cursor-mcp.json` : goes in the IDE cursor settings.
 
+## Sample Environment Configuration
+
+The convention files reference various environment variables. Create a `.env` file in your project root with the variables relevant to your technology stack:
+
+```bash
+# Project Configuration
+PROJECT_NAME=my-awesome-app
+STAGE=dev
+REGION=us-east-1
+OWNER="John Doe abc123"
+LOG_LEVEL=INFO
+NODE_ENV=development
+ENVIRONMENT=development
+
+# API Configuration
+API_VERSION=v1
+API_BASE_URL=https://api.example.com
+PORT=8000
+HOST=0.0.0.0
+CORS_ORIGINS=["http://localhost:3000","https://yourdomain.com"]
+RATE_LIMIT_REQUESTS=1000
+
+# Database Configuration
+DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+REDIS_URL=redis://localhost:6379
+
+# Authentication & Security
+SECRET_KEY=your-secret-key-here
+JWT_SECRET_KEY=your-jwt-secret-key-here
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+# Next.js Configuration (if using Next.js)
+NEXT_PUBLIC_PROJECT_NAME=my-awesome-app
+NEXT_PUBLIC_STAGE=dev
+NEXT_PUBLIC_API_URL=http://localhost:3001
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+
+# React Configuration (if using React)
+REACT_APP_PROJECT_NAME=my-app
+REACT_APP_STAGE=dev
+REACT_APP_API_URL=http://localhost:3001
+
+# AI/ML Configuration (if using LangChain)
+OPENAI_API_KEY=sk-your-openai-api-key-here
+ANTHROPIC_API_KEY=sk-ant-your-anthropic-api-key
+LANGCHAIN_API_KEY=your-langchain-api-key
+LANGCHAIN_TRACING_V2=true
+PINECONE_API_KEY=your-pinecone-api-key
+
+# WebSocket Configuration (if using WebSockets)
+WEBSOCKET_URL=ws://localhost:8000/ws
+MAX_CONNECTIONS_PER_USER=5
+MESSAGE_RATE_LIMIT=100
+
+# Docker/Production Configuration (if using Docker)
+SSL_EMAIL=admin@yourdomain.com
+DOMAIN=yourdomain.com
+
+# Testing Configuration
+DATABASE_URL_TEST=postgresql://test_user:test_pass@localhost:5432/test_db
+SECRET_KEY_TEST=test-secret-key-not-for-production
+```
+
+**Note**: 
+- Only include variables relevant to your project's technology stack
+- Replace placeholder values with your actual configuration
+- Use different `.env` files for different environments (`.env.local`, `.env.staging`, `.env.production`)
+- Never commit `.env` files containing sensitive data to version control
+- Add `.env` to your `.gitignore` file
+
 ## Usage Instructions
 
 1. **Select Relevant Conventions**: Only copy the convention files from the `conventions/` directory that match your project's technology stack
-2. **Customize as Needed**: Adapt the conventions to match your specific project requirements
-3. **Keep Updated**: Regularly review and update conventions as your project evolves
-4. **Team Alignment**: Ensure all team members understand and follow the established conventions
+2. **Configure Environment**: Create a `.env` file with only the variables needed for your selected conventions
+3. **Customize as Needed**: Adapt the conventions to match your specific project requirements
+4. **Keep Updated**: Regularly review and update conventions as your project evolves
+5. **Team Alignment**: Ensure all team members understand and follow the established conventions
 
 ## Tools
 
