@@ -16,6 +16,9 @@ serverless-api/
 ```
 
 ## Environment Variables
+
+View the `docs/conventions/aws-environment.md` for more about how the VPC, public and private subnets will be defined.
+
 ```bash
 PROJECT_NAME=my-awesome-app
 STAGE=dev

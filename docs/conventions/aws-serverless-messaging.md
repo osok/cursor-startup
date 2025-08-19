@@ -1,30 +1,33 @@
-# AWS Serverless Messaging Services
+# SQS Conventions
 
 ## Environment Variables
+
+View the `docs/conventions/aws-environment.md` for more about how the VPC, public and private subnets will be defined.
+
 ```bash
 PROJECT_NAME=my-awesome-app
 STAGE=dev
 REGION=us-east-1
-OWNER=John doe abc123
+OWNER=John Doe abc123
 LOG_LEVEL=INFO
 ```
 
-## SQS (Simple Queue Service)
-
-### Queue Configuration
+## Standard Queue Configuration
 ```yaml
 resources:
   Resources:
-    TaskQueue:
+    ProcessingQueue:
       Type: AWS::SQS::Queue
       Properties:
-        QueueName: ${self:custom.projectName}-${env:STAGE}-tasks
-        VisibilityTimeoutSeconds: 300
+        QueueName: ${self:custom.projectName}-${env:STAGE}-processing
+        VisibilityTimeoutSeconds: 300  # 6x function timeout
         MessageRetentionPeriod: 1209600  # 14 days
         DelaySeconds: 0
+        ReceiveMessageWaitTimeSeconds: 20  # Long polling
         RedrivePolicy:
-          deadLetterTargetArn: !GetAtt TaskDLQ.Arn
+          deadLetterTargetArn: !GetAtt ProcessingDLQ.Arn
           maxReceiveCount: 3
+        KmsMasterKeyId: alias/aws/sqs
         Tags:
           - Key: Owner
             Value: ${env:OWNER}
@@ -32,12 +35,13 @@ resources:
             Value: ${self:custom.projectName}
           - Key: stage
             Value: ${env:STAGE}
-            
-    TaskDLQ:
+
+    ProcessingDLQ:
       Type: AWS::SQS::Queue
       Properties:
-        QueueName: ${self:custom.projectName}-${env:STAGE}-tasks-dlq
+        QueueName: ${self:custom.projectName}-${env:STAGE}-processing-dlq
         MessageRetentionPeriod: 1209600  # 14 days
+        KmsMasterKeyId: alias/aws/sqs
         Tags:
           - Key: Owner
             Value: ${env:OWNER}
@@ -47,284 +51,333 @@ resources:
             Value: ${env:STAGE}
 ```
 
-### Lambda Integration
+## FIFO Queue Configuration
+```yaml
+resources:
+  Resources:
+    OrderQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:custom.projectName}-${env:STAGE}-orders.fifo
+        FifoQueue: true
+        ContentBasedDeduplication: true
+        DeduplicationScope: messageGroup
+        FifoThroughputLimit: perMessageGroupId
+        VisibilityTimeoutSeconds: 300
+        MessageRetentionPeriod: 1209600
+        RedrivePolicy:
+          deadLetterTargetArn: !GetAtt OrderDLQ.Arn
+          maxReceiveCount: 3
+        KmsMasterKeyId: alias/aws/sqs
+        Tags:
+          - Key: Owner
+            Value: ${env:OWNER}
+          - Key: env
+            Value: ${self:custom.projectName}
+          - Key: stage
+            Value: ${env:STAGE}
+
+    OrderDLQ:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:custom.projectName}-${env:STAGE}-orders-dlq.fifo
+        FifoQueue: true
+        MessageRetentionPeriod: 1209600
+        KmsMasterKeyId: alias/aws/sqs
+        Tags:
+          - Key: Owner
+            Value: ${env:OWNER}
+          - Key: env
+            Value: ${self:custom.projectName}
+          - Key: stage
+            Value: ${env:STAGE}
+```
+
+## Lambda Integration
 ```yaml
 functions:
-  processTask:
-    handler: src/handlers/queue.processTask
+  processMessages:
+    handler: src/handlers/queue.processMessages
+    timeout: 50  # Less than visibility timeout
+    reservedConcurrency: 5
+    environment:
+      QUEUE_URL: !Ref ProcessingQueue
     events:
       - sqs:
-          arn: !GetAtt TaskQueue.Arn
+          arn: !GetAtt ProcessingQueue.Arn
           batchSize: 10
           maximumBatchingWindowInSeconds: 5
           functionResponseType: ReportBatchItemFailures
-```
+          maximumConcurrency: 5
 
-### Best Practices
-- Use dead letter queues for failed messages
-- Set visibility timeout (6x function timeout)
-- Use batch processing for better throughput
-- Implement idempotent message processing
-- Monitor queue depth and age of messages
-
-## SNS (Simple Notification Service)
-
-### Topic Configuration
-```yaml
-resources:
-  Resources:
-    NotificationTopic:
-      Type: AWS::SNS::Topic
-      Properties:
-        TopicName: ${self:custom.projectName}-${env:STAGE}-notifications
-        DisplayName: "Application Notifications"
-        KmsMasterKeyId: alias/aws/sns
-        Tags:
-          - Key: Owner
-            Value: ${env:OWNER}
-          - Key: env
-            Value: ${self:custom.projectName}
-          - Key: stage
-            Value: ${env:STAGE}
-            
-    EmailSubscription:
-      Type: AWS::SNS::Subscription
-      Properties:
-        TopicArn: !Ref NotificationTopic
-        Protocol: email
-        Endpoint: admin@example.com
-        
-    SqsSubscription:
-      Type: AWS::SNS::Subscription
-      Properties:
-        TopicArn: !Ref NotificationTopic
-        Protocol: sqs
-        Endpoint: !GetAtt ProcessingQueue.Arn
-```
-
-### Lambda Integration
-```yaml
-functions:
-  handleNotification:
-    handler: src/handlers/notification.handler
+  processFifoMessages:
+    handler: src/handlers/queue.processFifoMessages
+    timeout: 50
+    environment:
+      FIFO_QUEUE_URL: !Ref OrderQueue
     events:
-      - sns:
-          arn: !Ref NotificationTopic
-          filterPolicy:
-            eventType:
-              - order.created
-              - order.updated
+      - sqs:
+          arn: !GetAtt OrderQueue.Arn
+          batchSize: 1  # FIFO requires sequential processing
+          functionResponseType: ReportBatchItemFailures
 ```
 
-### Best Practices
-- Use filter policies to route messages efficiently
-- Enable server-side encryption
-- Use FIFO topics for ordered message delivery
-- Implement message deduplication for FIFO
-- Set up appropriate retry policies
+## Message Publishing Patterns
 
-## EventBridge
-
-### Custom Event Bus
-```yaml
-resources:
-  Resources:
-    CustomEventBus:
-      Type: AWS::Events::EventBus
-      Properties:
-        Name: ${self:custom.projectName}-${env:STAGE}-events
-        Tags:
-          - Key: Owner
-            Value: ${env:OWNER}
-          - Key: env
-            Value: ${self:custom.projectName}
-          - Key: stage
-            Value: ${env:STAGE}
-```
-
-### Event Rules
-```yaml
-functions:
-  processOrderEvent:
-    handler: src/handlers/events.processOrder
-    events:
-      - eventBridge:
-          eventBus: !Ref CustomEventBus
-          pattern:
-            source:
-              - "myapp.orders"
-            detail-type:
-              - "Order Created"
-              - "Order Updated"
-            detail:
-              status:
-                - "confirmed"
-                - "shipped"
-```
-
-### Event Publishing Pattern
+### Python
 ```python
 import boto3
 import json
+from uuid import uuid4
 from datetime import datetime
 
-def publish_event(event_type, detail, source="myapp"):
-    client = boto3.client('events')
-    
-    response = client.put_events(
-        Entries=[
-            {
-                'Source': source,
-                'DetailType': event_type,
-                'Detail': json.dumps(detail),
-                'EventBusName': os.environ['EVENT_BUS_NAME'],
-                'Time': datetime.utcnow()
+sqs = boto3.client('sqs')
+
+def send_message(queue_url, message_body, delay_seconds=0):
+    response = sqs.send_message(
+        QueueUrl=queue_url,
+        MessageBody=json.dumps(message_body),
+        DelaySeconds=delay_seconds,
+        MessageAttributes={
+            'source': {
+                'StringValue': 'api',
+                'DataType': 'String'
+            },
+            'timestamp': {
+                'StringValue': datetime.utcnow().isoformat(),
+                'DataType': 'String'
             }
-        ]
+        }
+    )
+    return response
+
+def send_fifo_message(queue_url, message_body, group_id, deduplication_id=None):
+    if not deduplication_id:
+        deduplication_id = str(uuid4())
+    
+    response = sqs.send_message(
+        QueueUrl=queue_url,
+        MessageBody=json.dumps(message_body),
+        MessageGroupId=group_id,
+        MessageDeduplicationId=deduplication_id
+    )
+    return response
+
+def send_batch_messages(queue_url, messages):
+    entries = []
+    for i, message in enumerate(messages):
+        entries.append({
+            'Id': str(i),
+            'MessageBody': json.dumps(message),
+            'MessageAttributes': {
+                'source': {
+                    'StringValue': 'batch',
+                    'DataType': 'String'
+                }
+            }
+        })
+    
+    response = sqs.send_message_batch(
+        QueueUrl=queue_url,
+        Entries=entries
     )
     return response
 ```
 
-### Best Practices
-- Use custom event buses for application events
-- Implement event schemas for better governance
-- Use event replay for debugging and recovery
-- Monitor event processing with CloudWatch
-- Use dead letter queues for failed events
+### Node.js
+```javascript
+const { SQSClient, SendMessageCommand, SendMessageBatchCommand } = require('@aws-sdk/client-sqs');
 
-## Cognito
+const sqs = new SQSClient({ region: process.env.AWS_REGION });
 
-### User Pool Configuration
+const sendMessage = async (queueUrl, messageBody, delaySeconds = 0) => {
+  const command = new SendMessageCommand({
+    QueueUrl: queueUrl,
+    MessageBody: JSON.stringify(messageBody),
+    DelaySeconds: delaySeconds,
+    MessageAttributes: {
+      source: {
+        StringValue: 'api',
+        DataType: 'String'
+      },
+      timestamp: {
+        StringValue: new Date().toISOString(),
+        DataType: 'String'
+      }
+    }
+  });
+  
+  return await sqs.send(command);
+};
+
+const sendFifoMessage = async (queueUrl, messageBody, groupId, deduplicationId) => {
+  const command = new SendMessageCommand({
+    QueueUrl: queueUrl,
+    MessageBody: JSON.stringify(messageBody),
+    MessageGroupId: groupId,
+    MessageDeduplicationId: deduplicationId || require('uuid').v4()
+  });
+  
+  return await sqs.send(command);
+};
+```
+
+## Message Processing Patterns
+
+### Python Handler
+```python
+import json
+import logging
+
+logger = logging.getLogger(__name__)
+
+def process_messages(event, context):
+    failed_records = []
+    
+    for record in event['Records']:
+        try:
+            # Parse message
+            message_body = json.loads(record['body'])
+            receipt_handle = record['receiptHandle']
+            
+            # Process message
+            result = process_single_message(message_body)
+            logger.info(f"Processed message: {result}")
+            
+        except Exception as error:
+            logger.error(f"Failed to process message: {error}", exc_info=True)
+            failed_records.append({
+                'itemIdentifier': record['messageId']
+            })
+    
+    # Return failed records for retry
+    return {
+        'batchItemFailures': failed_records
+    }
+
+def process_single_message(message_body):
+    # Implement idempotent processing logic
+    message_id = message_body.get('id')
+    
+    # Check if already processed (idempotency)
+    if is_already_processed(message_id):
+        logger.info(f"Message {message_id} already processed")
+        return
+    
+    # Process business logic
+    result = handle_business_logic(message_body)
+    
+    # Mark as processed
+    mark_as_processed(message_id)
+    
+    return result
+```
+
+### Node.js Handler
+```javascript
+exports.processMessages = async (event, context) => {
+  const failedRecords = [];
+  
+  for (const record of event.Records) {
+    try {
+      const messageBody = JSON.parse(record.body);
+      const receiptHandle = record.receiptHandle;
+      
+      const result = await processSingleMessage(messageBody);
+      console.log('Processed message:', result);
+      
+    } catch (error) {
+      console.error('Failed to process message:', error);
+      failedRecords.push({
+        itemIdentifier: record.messageId
+      });
+    }
+  }
+  
+  return {
+    batchItemFailures: failedRecords
+  };
+};
+```
+
+## Queue Monitoring
 ```yaml
 resources:
   Resources:
-    CognitoUserPool:
-      Type: AWS::Cognito::UserPool
+    QueueDepthAlarm:
+      Type: AWS::CloudWatch::Alarm
       Properties:
-        UserPoolName: ${self:custom.projectName}-${env:STAGE}-users
-        UsernameAttributes:
-          - email
-        AutoVerifiedAttributes:
-          - email
-        Policies:
-          PasswordPolicy:
-            MinimumLength: 8
-            RequireUppercase: true
-            RequireLowercase: true
-            RequireNumbers: true
-            RequireSymbols: true
-        MfaConfiguration: OPTIONAL
-        EnabledMfas:
-          - SOFTWARE_TOKEN_MFA
-        UserPoolTags:
-          Owner: ${env:OWNER}
-          env: ${self:custom.projectName}
-          stage: ${env:STAGE}
-          
-    CognitoUserPoolClient:
-      Type: AWS::Cognito::UserPoolClient
+        AlarmName: ${self:custom.projectName}-${env:STAGE}-queue-depth
+        AlarmDescription: Queue depth too high
+        MetricName: ApproximateNumberOfVisibleMessages
+        Namespace: AWS/SQS
+        Statistic: Average
+        Period: 300
+        EvaluationPeriods: 2
+        Threshold: 100
+        ComparisonOperator: GreaterThanThreshold
+        Dimensions:
+          - Name: QueueName
+            Value: !GetAtt ProcessingQueue.QueueName
+        AlarmActions:
+          - !Ref SNSTopicArn
+
+    DLQAlarm:
+      Type: AWS::CloudWatch::Alarm
       Properties:
-        UserPoolId: !Ref CognitoUserPool
-        ClientName: ${self:custom.projectName}-${env:STAGE}-client
-        GenerateSecret: false
-        ExplicitAuthFlows:
-          - ADMIN_NO_SRP_AUTH
-          - USER_PASSWORD_AUTH
-        RefreshTokenValidity: 30
-        AccessTokenValidity: 60
-        IdTokenValidity: 60
+        AlarmName: ${self:custom.projectName}-${env:STAGE}-dlq-messages
+        AlarmDescription: Messages in DLQ
+        MetricName: ApproximateNumberOfVisibleMessages
+        Namespace: AWS/SQS
+        Statistic: Sum
+        Period: 300
+        EvaluationPeriods: 1
+        Threshold: 1
+        ComparisonOperator: GreaterThanOrEqualToThreshold
+        Dimensions:
+          - Name: QueueName
+            Value: !GetAtt ProcessingDLQ.QueueName
 ```
 
-### API Gateway Integration
+## IAM Permissions
 ```yaml
 provider:
-  httpApi:
-    authorizers:
-      cognitoAuthorizer:
-        type: jwt
-        identitySource: $request.header.Authorization
-        issuerUrl: !GetAtt CognitoUserPool.ProviderURL
-        audience:
-          - !Ref CognitoUserPoolClient
-
-functions:
-  protectedEndpoint:
-    handler: src/handlers/api.protected
-    events:
-      - httpApi:
-          path: /protected
-          method: get
-          authorizer:
-            name: cognitoAuthorizer
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - sqs:SendMessage
+        - sqs:SendMessageBatch
+      Resource: 
+        - !GetAtt ProcessingQueue.Arn
+        - !GetAtt OrderQueue.Arn
+    - Effect: Allow
+      Action:
+        - sqs:ReceiveMessage
+        - sqs:DeleteMessage
+        - sqs:GetQueueAttributes
+      Resource:
+        - !GetAtt ProcessingQueue.Arn
+        - !GetAtt OrderQueue.Arn
+    - Effect: Allow
+      Action:
+        - kms:Encrypt
+        - kms:Decrypt
+        - kms:ReEncrypt*
+        - kms:GenerateDataKey*
+        - kms:DescribeKey
+      Resource: !Sub "arn:aws:kms:${AWS::Region}:${AWS::AccountId}:alias/aws/sqs"
 ```
 
-### Best Practices
-- Use email as username for better UX
-- Enable MFA for sensitive applications
-- Configure password policies appropriately
-- Use pre/post authentication triggers for custom logic
-- Monitor authentication events
-
-## Integration Patterns
-
-### Fan-out with SNS + SQS
-```yaml
-resources:
-  Resources:
-    OrderTopic:
-      Type: AWS::SNS::Topic
-      Properties:
-        TopicName: ${self:custom.projectName}-${env:STAGE}-orders
-        Tags:
-          - Key: Owner
-            Value: ${env:OWNER}
-          - Key: env
-            Value: ${self:custom.projectName}
-          - Key: stage
-            Value: ${env:STAGE}
-        
-    # Multiple SQS queues for different processors
-    InventoryQueue:
-      Type: AWS::SQS::Queue
-      Properties:
-        QueueName: ${self:custom.projectName}-${env:STAGE}-inventory
-        Tags:
-          - Key: Owner
-            Value: ${env:OWNER}
-          - Key: env
-            Value: ${self:custom.projectName}
-          - Key: stage
-            Value: ${env:STAGE}
-        
-    ShippingQueue:
-      Type: AWS::SQS::Queue
-      Properties:
-        QueueName: ${self:custom.projectName}-${env:STAGE}-shipping
-        Tags:
-          - Key: Owner
-            Value: ${env:OWNER}
-          - Key: env
-            Value: ${self:custom.projectName}
-          - Key: stage
-            Value: ${env:STAGE}
-```
-
-### Event-Driven Architecture
-- Use EventBridge for loose coupling
-- Implement event sourcing patterns
-- Use event replay for system recovery
-- Monitor event flows with distributed tracing
-
-## Error Handling
-- Implement dead letter queues for all async processing
-- Use exponential backoff for retries
-- Log all processing errors with context
-- Set up alerts for high error rates
-- Use circuit breaker patterns for external dependencies
-
-## Monitoring & Observability
-- Track message processing latency
-- Monitor queue depths and DLQ messages
-- Set up dashboards for messaging metrics
-- Use X-Ray for distributed tracing
-- Implement custom metrics for business logic
+## Best Practices
+- Use dead letter queues for failed messages
+- Set visibility timeout to 6x function timeout
+- Enable long polling (20 seconds)
+- Use batch processing for better throughput
+- Implement idempotent message processing
+- Use FIFO queues for ordered processing
+- Enable server-side encryption with KMS
+- Monitor queue depth and DLQ messages
+- Use message attributes for filtering
+- Implement proper error handling and retries
+- Use reserved concurrency to prevent throttling
+- Return batch item failures for partial success
