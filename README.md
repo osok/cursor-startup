@@ -1,13 +1,50 @@
 # cursor-startup
 
-These are the startup files I use in my cursor environment.
+This repository contains startup configurations and templates for Cursor IDE with dual capabilities:
 
-## docs/
+- **Software Development**: Complete development workflow with design documents, task management, and coding conventions
+- **Security Code Review**: Comprehensive security audit framework with vulnerability assessment tools and methodologies
 
-- `Design.md` : I use Sonnet to create a design document that I place here
-- `notes.md` : the cursor rules spell out what and how to store project related memories in the notes file.
-- `task_list.md` : this is the task list that I have cursor process the design, create an implementation plan and then create a `task_list.md`.  This helps keep the AI on track.
-- `conventions/` : this directory covers library specific conventions to be used to keep projects built to a standard.  **Only include the convention files that apply to your specific project** - others can be left out.
+Choose the appropriate capability folder based on your project needs, or use both for projects requiring development and security review phases.
+
+## Project Structure
+
+### Software Development/
+Contains all files and configurations for software development projects:
+- `docs/Design.md` - Project design documentation
+- `docs/notes.md` - Development notes and decisions
+- `docs/task_list.md` - Development task tracking
+- `docs/conventions/` - Coding conventions for various frameworks
+- `docs/default_prompt.md` - Development workflow instructions
+
+### Security Code Review/
+Contains all files and configurations for security audit projects:
+- `docs/Security_review.md` - Security audit objectives and methodology
+- `docs/task_list.md` - Security review task tracking
+- `docs/notes.md` - Security findings and analysis notes
+- `docs/output/` - Generated security reports and findings
+- `docs/default_prompt.md` - Security review workflow instructions
+
+### Legacy docs/ (Deprecated)
+The original `docs/` folder structure has been moved into the `Software Development/` folder. This maintains backward compatibility while providing the new dual-capability structure.
+
+## Documentation Structure (Per Capability)
+
+Each capability folder contains its own `docs/` directory with the following structure:
+
+**For Software Development:**
+- `docs/Design.md` - Project design documentation and architecture decisions
+- `docs/notes.md` - Development notes, decisions, and project memories
+- `docs/task_list.md` - Development task tracking with dependencies and status
+- `docs/default_prompt.md` - Development workflow and AI instructions
+- `docs/conventions/` - Coding conventions for various frameworks (**Only include relevant files**)
+
+**For Security Code Review:**
+- `docs/Security_review.md` - Security audit objectives, methodology, and checklist
+- `docs/task_list.md` - Security review task tracking and audit progress
+- `docs/notes.md` - Security findings, analysis notes, and concerns
+- `docs/default_prompt.md` - Security review workflow and AI instructions
+- `docs/output/` - Generated security reports, findings, and coverage documentation
 
 ## Convention Files
 
@@ -42,34 +79,95 @@ These are the startup files I use in my cursor environment.
 ### AI & Machine Learning Conventions
 - `langchain.md` - LangChain and LangGraph conventions for AI workflows, prompt management, agent patterns, and memory implementations
 
-## .cursor/
+## Configuration Files
 
-- `mcp.json` : this is project related tools, I keep the file-system mcp tool here so I can set its permissions to only the project directory.
+### MCP Configuration
+- Each capability folder can include its own `mcp.json` for project-specific tool configurations
+- The filesystem MCP tool permissions should be set to the specific project directory
+- Configuration is capability-specific to optimize for development vs security review workflows
 
-## .cursor/rules
-- 001-project-organization.mdc - Project organization and file usage guidelines (Rule Type: Manual)
-- 002-development-workflow.mdc - Task management and workflow rules (Rule Type: Always)
-- 003-testing-guidelines.mdc - Testing workflow and conventions (Rule Type: Manual)
-- 004-context7-integration.mdc - Context7 integration settings (Rule Type: Always)
-- 005-coding-conventions.mdc - this explains how to use the files in the convention directory
-- 010-documentation-usage.mdc - this explains how to use the mcp server to create uml and other project docs (*NOTE See: https://github.com/osok/mcp-support-docs)
+### Cursor Rules (Embedded in Capabilities)
+Both capability folders include embedded cursor rules:
+- **001-project-organization** - Project organization and file usage guidelines (Always Applied)
+- **002-development-workflow** - Task management and workflow rules (Always Applied) 
+- **003-testing-guidelines** - Testing workflow and conventions (Manual)
+- **004-context7-integration** - Context7 integration settings (Always Applied)
+- **005-coding-conventions** - Framework-specific coding convention usage (Manual)
+- **010-documentation-usage** - MCP documentation tool usage guidelines (Always Applied)
 
-## Other files
-
-- `github.sh` : should reside outside the project directory and only needs to be set up once.  in your `~/.cursor` dir is a good place for it.
-- `cursor-mcp.json` : goes in the IDE cursor settings.
+### External Files
+- `github.sh` : Should reside outside the project directory (recommended: `~/.cursor/`)
+- `cursor-mcp.json` : Goes in the IDE cursor settings for global MCP configuration
 
 ## Usage Instructions
 
+### Getting Started
+
+1. **Choose Your Capability**: 
+   - Copy the `Software Development/` folder for development projects
+   - Copy the `Security Code Review/` folder for security audits
+   - Copy both folders if you need both capabilities
+
+2. **Setup Your Project**:
+   - Copy the chosen capability folder(s) to your project root
+   - Rename the folder(s) as needed (e.g., remove the capability prefix)
+   - Follow the specific setup instructions for each capability below
+
+### Software Development Setup
+
 1. **Select Relevant Conventions**: Only copy the convention files from the `conventions/` directory that match your project's technology stack
 2. **Customize as Needed**: Adapt the conventions to match your specific project requirements
-3. **Keep Updated**: Regularly review and update conventions as your project evolves
-4. **Team Alignment**: Ensure all team members understand and follow the established conventions
+3. **Create Design Document**: Use Sonnet to create your project design in `docs/Design.md`
+4. **Initialize Task List**: Process the design to create an implementation plan in `docs/task_list.md`
+5. **Configure MCP Tools**: Set up the documentation generation tools for UML and module functions
+6. **Team Alignment**: Ensure all team members understand and follow the established conventions
 
-## Tools
+### Security Code Review Setup
 
-- `filesystem` : allows access to project files so it can read / write files on your behalf.
-- `github` : interact with github
-- `exa-mcp` : allows AI to search the web to find updated information.
-- `context7` : provides up to date documentation on a number of libraries, so the AI knows how to properly code.
-- `docs-generator` : creates text based UML for all OO, module-functions doc that describes the methods in non OO code, and a tree structure for the project. This keeps cursor from duplicating code or getting lost in the project.
+1. **Define Scope**: Update `docs/Security_review.md` with your specific audit objectives
+2. **Configure Project Path**: Update the project path in `docs/default_prompt.md` to match your target codebase
+3. **Generate Documentation**: Use MCP doc-tools to create UML, module functions, and tree structure
+4. **Create Task Plan**: Generate a comprehensive security review task list based on the security checklist
+5. **Setup Output Structure**: Ensure the `docs/output/` directory exists for findings and reports
+
+### Workflow Commands
+
+**For Software Development:**
+- `continue` - Resume development work based on task list
+- Follow the checkpoint system for quality gates
+- Update notes and task list regularly
+
+**For Security Code Review:**
+- `start` - Initialize security review with documentation generation and task planning
+- `continue` - Proceed with next security review tasks
+- `finish` - Complete review with final analysis and true positive validation
+
+## Tools and MCP Configuration
+
+### Core Tools (Used by Both Capabilities)
+
+- `filesystem` : Allows access to project files for reading and writing
+- `docs-generator` (MCP): Creates UML diagrams, module-functions documentation, and tree structures
+- `exa-mcp` : Web search capability for finding updated information
+- `context7` : Provides up-to-date documentation for libraries and frameworks
+
+### Development-Specific Tools
+
+- `github` : GitHub integration for repository management
+- Supports all major development frameworks and libraries
+- Automated testing and quality gate enforcement
+
+### Security Review-Specific Tools
+
+- Static analysis integration (Bandit, Semgrep, CodeQL)
+- Vulnerability scanning capabilities
+- CVSS scoring and MITRE categorization
+- Comprehensive security checklist automation
+
+### MCP Configuration Files
+
+Each capability includes its own MCP configuration:
+- **Software Development**: Optimized for development workflows, code generation, and project management
+- **Security Code Review**: Configured for security analysis, vulnerability detection, and audit reporting
+
+The MCP tools automatically generate documentation that prevents code duplication and helps maintain project context across both development and security review phases.
