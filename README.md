@@ -25,8 +25,6 @@ Contains all files and configurations for security audit projects:
 - `docs/output/` - Generated security reports and findings
 - `docs/default_prompt.md` - Security review workflow instructions
 
-### Legacy docs/ (Deprecated)
-The original `docs/` folder structure has been moved into the `Software Development/` folder. This maintains backward compatibility while providing the new dual-capability structure.
 
 ## Documentation Structure (Per Capability)
 
