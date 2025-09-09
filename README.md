@@ -5,7 +5,7 @@ This repository contains startup configurations and templates for Cursor IDE wit
 - **Software Development**: Complete development workflow with design documents, task management, and coding conventions
 - **Security Code Review**: Comprehensive security audit framework with vulnerability assessment tools and methodologies
 
-Choose the appropriate capability folder based on your project needs, or use both for projects requiring development and security review phases.
+Choose the appropriate capability folder based on your project needs, or use both for projects requiring development and security review phases. place the `docs/` in the root of your project along with the `.cursor` file.
 
 ## Project Structure
 
@@ -145,7 +145,7 @@ Both capability folders include embedded cursor rules:
 ### Core Tools (Used by Both Capabilities)
 
 - `filesystem` : Allows access to project files for reading and writing
-- `docs-generator` (MCP): Creates UML diagrams, module-functions documentation, and tree structures
+- `project-docs` (MCP): Creates UML diagrams, module-functions documentation, and tree structures [Project Docs](https://github.com/osok/project-docs) 
 - `exa-mcp` : Web search capability for finding updated information
 - `context7` : Provides up-to-date documentation for libraries and frameworks
 
