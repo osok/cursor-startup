@@ -5,25 +5,67 @@ This repository contains startup configurations and templates for Cursor IDE wit
 - **Software Development**: Complete development workflow with design documents, task management, and coding conventions
 - **Security Code Review**: Comprehensive security audit framework with vulnerability assessment tools and methodologies
 
-Choose the appropriate capability folder based on your project needs, or use both for projects requiring development and security review phases. place the `docs/` in the root of your project along with the `.cursor` file.
+Choose the appropriate capability folder based on your project needs, or use both for projects requiring development and security review phases. 
 
-## Project Structure
+## Instruction for use:
 
-### Software Development/
-Contains all files and configurations for software development projects:
-- `docs/Design.md` - Project design documentation
-- `docs/notes.md` - Development notes and decisions
-- `docs/task_list.md` - Development task tracking
-- `docs/conventions/` - Coding conventions for various frameworks
-- `docs/default_prompt.md` - Development workflow instructions
+### Software Development
 
-### Security Code Review/
-Contains all files and configurations for security audit projects:
-- `docs/Security_review.md` - Security audit objectives and methodology
-- `docs/task_list.md` - Security review task tracking
-- `docs/notes.md` - Security findings and analysis notes
-- `docs/output/` - Generated security reports and findings
-- `docs/default_prompt.md` - Security review workflow instructions
+#### Setup
+- Create a new project folder
+- Copy the `docs/` and `.cursor/` into the project directory.
+- Edit the mcp.json in the .cusror dir to the filesystem has access to your project folder and any other folders on your system that you want to interact with.  This project specific, which is why it is here.
+- Create a Design document, I use AI to do this.  Copy the resilts formated as markdown to the docs/Design.md
+- Create UML in mermaid format that represents the implementation of the above Design.  you should use the same chat session as above to create these.  Include
+   - Class Diagrams
+   - Sequence Diagrams for the major workflows
+   - State and activity diagrams
+   - Component Diagrams.
+- Review the `docs/conventions` remove anything that doesn't relate to your project.  IF you have new convention files, use the existing ones and AI to develop new files.  These will be added to the context if needed so they need to be short and concise.
+- Start Cursor and open the new folder. 
+- modify the Default_promt.md, to include the project working directory. About halfway down you should see `[PLACE PROJECT PATH HERE]`
+- you do not need a requirements document, Sometimes I do and latelyt I have been changing that to Design UML.md
+- make sure the filesystem and project-docs tool are active.
+
+#### Starting
+- Select the model or use Auto, I personally like Sonnet-4, and use an API key.  This gives me the best esults but can cost $20+ a day.
+- set the default_prompt in the chat box  where you see the `@`.  This gets added to the context immediately.
+- then just type `start`, this will create the task_list and notes.
+
+#### Coding
+- Create a new chart session, reference the default_prompt.md in the chat next to the `@`, this needs to be done with every new chat.
+- then type `continue`, this will kick off the coding workflow.
+- when you get to 80% of the context used, start anew session.  Using sonnet max allows up to a 1 Million token context, I try not to use that becaue it increases the daily coding cost when you are sending large context over and over.
+
+#### Notable
+- As cursor codes, it should be creating unit test.  This allows it to entera break fix cycle which gets the code right.  
+- You want to ensure you have an 85% or better coverage.  Before you finsh the project you should ask it to caculate the testing coverage, and adjust until you get 85% or better coverage.
+- I have been asking cursor to create comprehensive delvoper documents at the end of every project.  It dshould include UML based on the actual code.  Then I review that and spot check to make sure its accurate.  Since I didn't code the project it helps me understand exactly what it did.
+
+### Secure Code Review
+
+#### Setup
+- Create a new project folder
+- Copy the `docs/` and `.cursor/` into the project directory.
+- Edit the mcp.json in the .cusror dir to the filesystem has access to your project folder and any other folders on your system that you want to interact with.  This project specific, which is why it is here.
+- modify the Default_promt.md, to include the project working directory. About halfway down you should see `[PLACE PROJECT PATH HERE]`
+- make sure the filesystem and project-docs tool are active.
+
+#### Start
+- Select the model or use Auto, I personally like Sonnet-4, and use an API key.  This gives me the best esults but can cost $20+ a day.
+- set the default_prompt in the chat box  where you see the `@`.  This gets added to the context immediately.
+- then just type `start`, this will create the task_list and notes.
+
+#### Testing
+- Create a new chart session, reference the default_prompt.md in the chat next to the `@`, this needs to be done with every new chat.
+- then type `continue`, this will kick off the testing workflow
+- when you get to 80% of the context used, start anew session.  Using sonnet max allows up to a 1 Million token context, I try not to use that becaue it increases the daily coding cost when you are sending large context over and over.
+
+#### Finish
+- Create a new chart session, reference the default_prompt.md in the chat next to the `@`, this needs to be done with every new chat.
+- then type `finish`, this will kick off the testing workflow.
+- this will wwrap up the testing and create more documentation based on the findings.
+
 
 
 ## Documentation Structure (Per Capability)
@@ -97,21 +139,9 @@ Both capability folders include embedded cursor rules:
 - `github.sh` : Should reside outside the project directory (recommended: `~/.cursor/`)
 - `cursor-mcp.json` : Goes in the IDE cursor settings for global MCP configuration
 
-## Usage Instructions
+## Repository Files
 
-### Getting Started
-
-1. **Choose Your Capability**: 
-   - Copy the `Software Development/` folder for development projects
-   - Copy the `Security Code Review/` folder for security audits
-   - Copy both folders if you need both capabilities
-
-2. **Setup Your Project**:
-   - Copy the chosen capability folder(s) to your project root
-   - Rename the folder(s) as needed (e.g., remove the capability prefix)
-   - Follow the specific setup instructions for each capability below
-
-### Software Development Setup
+### Software Development Files
 
 1. **Select Relevant Conventions**: Only copy the convention files from the `conventions/` directory that match your project's technology stack
 2. **Customize as Needed**: Adapt the conventions to match your specific project requirements
@@ -120,7 +150,7 @@ Both capability folders include embedded cursor rules:
 5. **Configure MCP Tools**: Set up the documentation generation tools for UML and module functions
 6. **Team Alignment**: Ensure all team members understand and follow the established conventions
 
-### Security Code Review Setup
+### Security Code Review Files
 
 1. **Define Scope**: Update `docs/Security_review.md` with your specific audit objectives
 2. **Configure Project Path**: Update the project path in `docs/default_prompt.md` to match your target codebase
@@ -128,44 +158,18 @@ Both capability folders include embedded cursor rules:
 4. **Create Task Plan**: Generate a comprehensive security review task list based on the security checklist
 5. **Setup Output Structure**: Ensure the `docs/output/` directory exists for findings and reports
 
-### Workflow Commands
-
-**For Software Development:**
-- `continue` - Resume development work based on task list
-- Follow the checkpoint system for quality gates
-- Update notes and task list regularly
-
-**For Security Code Review:**
-- `start` - Initialize security review with documentation generation and task planning
-- `continue` - Proceed with next security review tasks
-- `finish` - Complete review with final analysis and true positive validation
 
 ## Tools and MCP Configuration
 
 ### Core Tools (Used by Both Capabilities)
 
-- `filesystem` : Allows access to project files for reading and writing
-- `project-docs` (MCP): Creates UML diagrams, module-functions documentation, and tree structures [Project Docs](https://github.com/osok/project-docs) 
-- `exa-mcp` : Web search capability for finding updated information
-- `context7` : Provides up-to-date documentation for libraries and frameworks
+- `filesystem` : **Optional** Allows access to project files for reading and writing
+- `project-docs` (MCP): **Required** -Creates UML diagrams, module-functions documentation, and tree structures [Project Docs](https://github.com/osok/project-docs) 
+- `exa-mcp` : **Optional** Web search capability for finding updated information 
+- `context7` : **Optional** Provides up-to-date documentation for libraries and frameworks
 
 ### Development-Specific Tools
 
-- `github` : GitHub integration for repository management
+- `github` : **Optional** GitHub integration for repository management, simplifes git work, but cursor can do so form the commandline as well.  this has a lot of tools, which eats up many of the limited 40 tools available in cursor.  I'm not using this unless my repo gets messed up.
 - Supports all major development frameworks and libraries
 - Automated testing and quality gate enforcement
-
-### Security Review-Specific Tools
-
-- Static analysis integration (Bandit, Semgrep, CodeQL)
-- Vulnerability scanning capabilities
-- CVSS scoring and MITRE categorization
-- Comprehensive security checklist automation
-
-### MCP Configuration Files
-
-Each capability includes its own MCP configuration:
-- **Software Development**: Optimized for development workflows, code generation, and project management
-- **Security Code Review**: Configured for security analysis, vulnerability detection, and audit reporting
-
-The MCP tools automatically generate documentation that prevents code duplication and helps maintain project context across both development and security review phases.
