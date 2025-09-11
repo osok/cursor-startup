@@ -28,7 +28,7 @@
 When the user asks you to `start` or `initialize`, please do these steps:
 - Read through the Design document, and Design UML  if it exists
 - take a step back and think about how to construct this application
-- develop an implementation plan, and document by creating a tasklist with dependancies, references and status.  Make sure the tasklist is in markdown and in a table so a user can easily review it looking for the current progress.
+- develop a comprehensive implementation plan, and document by creating a tasklist with dependencies, references and status.  Make sure the tasklist is in markdown and in a table so a user can easily review it looking for the current progress.
 - If needed add important noes to the notes.md
 
 ### Continue
